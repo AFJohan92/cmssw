@@ -5,20 +5,20 @@
 #include "Validation/MuonCSCDigis/interface/CSCComparatorDigiValidation.h"
 #include "Validation/MuonCSCDigis/interface/CSCStripDigiValidation.h"
 #include "Validation/MuonCSCDigis/interface/CSCWireDigiValidation.h"
-//#include "Validation/MuonCSCDigis/interface/CSCStubEfficiencyValidation.h"
+#include "Validation/MuonCSCDigis/interface/CSCStubEfficiencyValidation.h"
 #include <iostream>
 #include <memory>
 
 CSCDigiValidation::CSCDigiValidation(const edm::ParameterSet &ps)
     : doSim_(ps.getParameter<bool>("doSim")),
       theSimHitMap(ps.getParameter<edm::InputTag>("simHitsTag"), consumesCollector()),
-      theCSCGeometry(nullptr)//,
-      //theStripDigiValidation(nullptr),
-      //theWireDigiValidation(nullptr),
-      //theComparatorDigiValidation(nullptr),
-      //theALCTDigiValidation(nullptr),
-      //theCLCTDigiValidation(nullptr),
-      //theStubEfficiencyValidation(nullptr)
+      theCSCGeometry(nullptr),
+      theStripDigiValidation(nullptr),
+      theWireDigiValidation(nullptr),
+      theComparatorDigiValidation(nullptr),
+      theALCTDigiValidation(nullptr),
+      theCLCTDigiValidation(nullptr),
+      theStubEfficiencyValidation(nullptr)
  {
   theStripDigiValidation =
       std::make_unique<CSCStripDigiValidation>(ps.getParameter<edm::InputTag>("stripDigiTag"), consumesCollector());
@@ -32,8 +32,8 @@ CSCDigiValidation::CSCDigiValidation(const edm::ParameterSet &ps)
       std::make_unique<CSCALCTDigiValidation>(ps.getParameter<edm::InputTag>("alctDigiTag"), consumesCollector());
   theCLCTDigiValidation =
       std::make_unique<CSCCLCTDigiValidation>(ps.getParameter<edm::InputTag>("clctDigiTag"), consumesCollector());
-  //theStubEfficiencyValidation = 
-  //    std::make_unique<CSCStubEfficiencyValidation>(ps.getParameter<edm::InputTag>("stubEfficiencyTag"), consumesCollector());
+  theStubEfficiencyValidation = 
+      std::make_unique<CSCStubEfficiencyValidation>(ps.getParameter<edm::InputTag>("stubEfficiencyTag"), consumesCollector());
 
   if (doSim_) {
     theStripDigiValidation->setSimHitMap(&theSimHitMap);
@@ -54,7 +54,7 @@ void CSCDigiValidation::bookHistograms(DQMStore::IBooker &iBooker,
   theComparatorDigiValidation->bookHistograms(iBooker);
   theALCTDigiValidation->bookHistograms(iBooker);
   theCLCTDigiValidation->bookHistograms(iBooker);
-  //theStubEfficiencyValidation->bookHistograms(iBooker);
+  theStubEfficiencyValidation->bookHistograms(iBooker);
 }
 
 void CSCDigiValidation::analyze(const edm::Event &e, const edm::EventSetup &eventSetup) {
@@ -68,12 +68,12 @@ void CSCDigiValidation::analyze(const edm::Event &e, const edm::EventSetup &even
   theComparatorDigiValidation->setGeometry(pGeom);
   theALCTDigiValidation->setGeometry(pGeom);
   theCLCTDigiValidation->setGeometry(pGeom);
-  //theStubEfficiencyValidation->setGeometry(pGeom);
+  theStubEfficiencyValidation->setGeometry(pGeom);
 
   theStripDigiValidation->analyze(e, eventSetup);
   theWireDigiValidation->analyze(e, eventSetup);
   theComparatorDigiValidation->analyze(e, eventSetup);
   theALCTDigiValidation->analyze(e, eventSetup);
   theCLCTDigiValidation->analyze(e, eventSetup);
-  //theStubEfficiencyValidation->analyze(e, eventSetup);
+  theStubEfficiencyValidation->analyze(e, eventSetup);
 }

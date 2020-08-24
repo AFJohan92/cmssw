@@ -18,7 +18,7 @@ class CSCWireDigiValidation;
 class CSCComparatorDigiValidation;
 class CSCALCTDigiValidation;
 class CSCCLCTDigiValidation;
-//class CSCStubEfficiencyValidation;
+class CSCStubEfficiencyValidation;
 
 class CSCDigiValidation : public DQMEDAnalyzer {
 public:
