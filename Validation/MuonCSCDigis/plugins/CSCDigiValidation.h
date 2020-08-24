@@ -18,6 +18,7 @@ class CSCWireDigiValidation;
 class CSCComparatorDigiValidation;
 class CSCALCTDigiValidation;
 class CSCCLCTDigiValidation;
+//class CSCStubEfficiencyValidation;
 
 class CSCDigiValidation : public DQMEDAnalyzer {
 public:
@@ -36,8 +37,8 @@ private:
   std::unique_ptr<CSCComparatorDigiValidation> theComparatorDigiValidation;
   std::unique_ptr<CSCALCTDigiValidation> theALCTDigiValidation;
   std::unique_ptr<CSCCLCTDigiValidation> theCLCTDigiValidation;
-
   edm::ESGetToken<CSCGeometry, MuonGeometryRecord> geomToken_;
+  std::unique_ptr<CSCStubEfficiencyValidation> theStubEfficiencyValidation;
 };
 
 #endif
