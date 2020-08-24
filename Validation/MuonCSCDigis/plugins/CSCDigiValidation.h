@@ -17,7 +17,7 @@ class CSCWireDigiValidation;
 class CSCComparatorDigiValidation;
 class CSCALCTDigiValidation;
 class CSCCLCTDigiValidation;
-//class CSCStubEfficiencyValidation;
+class CSCStubEfficiencyValidation;
 
 class CSCDigiValidation : public DQMEDAnalyzer {
 public:
@@ -36,7 +36,7 @@ private:
   std::unique_ptr<CSCComparatorDigiValidation> theComparatorDigiValidation;
   std::unique_ptr<CSCALCTDigiValidation> theALCTDigiValidation;
   std::unique_ptr<CSCCLCTDigiValidation> theCLCTDigiValidation;
-  //std::unique_ptr<CSCStubEfficiencyValidation> theStubEfficiencyValidation;
+  std::unique_ptr<CSCStubEfficiencyValidation> theStubEfficiencyValidation;
 };
 
 #endif
