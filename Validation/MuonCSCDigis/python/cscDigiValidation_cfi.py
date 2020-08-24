@@ -5,6 +5,9 @@ from Validation.MuonCSCDigis.muonCSCDigiPSet import *
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
 cscDigiValidation = DQMEDAnalyzer('CSCDigiValidation',
+    muonSimHitMatcherPSet,                                                                                                                                     
+    muonCSCStubPSet,                                                                                                                                           
+    muonCSCDigiPSet,
     simHitsTag = cms.InputTag("mix", "g4SimHitsMuonCSCHits"),
     wireDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCWireDigi"),
     outputFile = cms.string(''),
@@ -12,11 +15,8 @@ cscDigiValidation = DQMEDAnalyzer('CSCDigiValidation',
     comparatorDigiTag = cms.InputTag("simMuonCSCDigis","MuonCSCComparatorDigi"),
     alctDigiTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
     clctDigiTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
-    doSim = cms.bool(False),
-    #muonSimHitMatcherPSet,
-    #muonCSCStubPSet,
-    #muonCSCDigiPSet
-    #And GEM matcher
+    doSim = cms.bool(False)
+    #And GEM matcher?
 )
 
 from Configuration.Eras.Modifier_fastSim_cff import fastSim
