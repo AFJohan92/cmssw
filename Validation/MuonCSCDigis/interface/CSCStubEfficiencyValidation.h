@@ -14,13 +14,16 @@ public:
   ~CSCStubEfficiencyValidation() override;
   void bookHistograms(DQMStore::IBooker &);
   void analyze(const edm::Event &, const edm::EventSetup &) override;
+  // I am not sure if I need another function. This may be it...
 
 private:
   edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
+  // Probably need to add tokens for the other stubs
 
   MonitorElement *theTimeBinPlots[10];
   MonitorElement *theNDigisPerLayerPlots[10];
   MonitorElement *theNDigisPerEventPlot;
+  // Add more plots here when I figure out how to actually get the info and plot the efficiencies
 };
 
 #endif
