@@ -31,7 +31,8 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &in
   // Could it be the way I did above?
 
   // Initialize stub matcher
-  cscStubMatcher_ = CSCStubMatcher(pset, iC);
+  cscStubMatcher_.reset(new CSCStubMatcher(pset, std::move(iC)));
+  //cscStubMatcher_ = CSCStubMatcher(pset, std::move(iC));
 
   // Below is what the MuonGEMDigisHarvestor has. I think I will need this kind of information...
   // region_ids_ = pset.getUntrackedParameter<std::vector<Int_t> >("regionIds");
@@ -92,7 +93,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   e.getByToken(mplcts_Token_, lcts);
 
   // Initialize StubMatcher
-  cscStubMatcher_.init(e,eventSetup);
+  cscStubMatcher_->init(e,eventSetup);
   
   // Not sure what this does, does it flatten the track/vertex container?
   const edm::SimTrackContainer& sim_track = *sim_tracks.product();
@@ -128,14 +129,14 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   for (const auto& t : sim_track_selected) {
     // Match track to stubs with appropriate vertex
     // Should this be done on the container, or on the entries of the container as done here?
-    cscStubMatcher_.match(t, sim_vert[t.vertIndex()]);
+    cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
 
     // Store matched stubs.
     // Key: ChamberID, Value : CSCStubDigiContainer
-    std::map<unsigned int, CSCALCTDigiContainer> alcts = cscStubMatcher_.alcts();
-    std::map<unsigned int, CSCCLCTDigiContainer> clcts = cscStubMatcher_.clcts();
-    std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts = cscStubMatcher_.lcts();
-    std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_.mplcts();  
+    std::map<unsigned int, CSCALCTDigiContainer> alcts = cscStubMatcher_->alcts();
+    std::map<unsigned int, CSCCLCTDigiContainer> clcts = cscStubMatcher_->clcts();
+    std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts = cscStubMatcher_->lcts();
+    std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_->mplcts();  
 
     // Loop over all (10?) ChamberIDs to make numerators and denominators for the efficiency
     for(int chambID = 0; chambID<10; chambID++) {

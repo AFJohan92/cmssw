@@ -23,6 +23,9 @@ public:
   virtual void analyze(const edm::Event &, const edm::EventSetup &);
   // I am not sure if I need another function. This may be it...
 
+  std::shared_ptr<CSCStubMatcher> cscStubMatcher() { return cscStubMatcher_; }
+  void setCSCStubMatcher(std::shared_ptr<CSCStubMatcher> s) {cscStubMatcher_ = s;}
+
 private:
   bool isSimTrackGood(const SimTrack& t);
   
@@ -30,8 +33,9 @@ private:
   edm::EDGetTokenT<CSCCLCTDigiCollection> clcts_Token_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lcts_Token_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplcts_Token_;
-  
-  CSCStubMatcher cscStubMatcher_;
+
+  std::shared_ptr<CSCStubMatcher> cscStubMatcher_;
+  //CSCStubMatcher cscStubMatcher_;
 
   MonitorElement *numeratorPlots[10];
   MonitorElement *denominatorPlots[10];
