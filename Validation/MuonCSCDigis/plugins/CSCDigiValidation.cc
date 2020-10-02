@@ -33,7 +33,7 @@ CSCDigiValidation::CSCDigiValidation(const edm::ParameterSet &ps)
   theCLCTDigiValidation =
       std::make_unique<CSCCLCTDigiValidation>(ps.getParameter<edm::InputTag>("clctDigiTag"), consumesCollector());
   theStubEfficiencyValidation = 
-      std::make_unique<CSCStubEfficiencyValidation>(ps.getParameter<edm::InputTag>("stubEfficiencyTag"), consumesCollector());
+    std::make_unique<CSCStubEfficiencyValidation>(ps.getParameter<edm::InputTag>("stubEfficiencyTag"), ps, consumesCollector());
 
   if (doSim_) {
     theStripDigiValidation->setSimHitMap(&theSimHitMap);
