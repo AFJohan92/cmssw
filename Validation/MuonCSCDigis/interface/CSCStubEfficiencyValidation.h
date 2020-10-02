@@ -7,18 +7,21 @@
 #include "DataFormats/CSCDigi/interface/CSCALCTDigi.h"
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "Validation/MuonCSCDigis/interface/CSCBaseValidation.h"
+#include "Validation/MuonCSCDigis/interface/CSCStubMatcher.h"
 
 class CSCStubEfficiencyValidation : public CSCBaseValidation {
 public:
   CSCStubEfficiencyValidation(const edm::InputTag &inputTag, edm::ConsumesCollector &&iC);
   ~CSCStubEfficiencyValidation() override;
   void bookHistograms(DQMStore::IBooker &);
-  void analyze(const edm::Event &, const edm::EventSetup &) override;
+  void analyze(const edm::Event &, const edm::EventSetup &, const edm::ParameterSet& pset) override;
   // I am not sure if I need another function. This may be it...
 
 private:
   edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
-  // Probably need to add tokens for the other stubs
+  edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
+  edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
+  CSCStubMatcher cscStubMatcher_;
 
   MonitorElement *theTimeBinPlots[10];
   MonitorElement *theNDigisPerLayerPlots[10];

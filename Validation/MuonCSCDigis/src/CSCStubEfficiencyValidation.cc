@@ -11,18 +11,13 @@
 // How to get stub information: not sure, but CSC vaidation classes seem to do it
 // Which efficiency plotter to use: GEMs use a book1DEff function. Use this? It passes a DQMStore iGetter and iBooker
 
-// Constructor: I assume it should be like what CSCALCTDigiValidation does...
-//
-// The constructor of the MuonGEMDigisHarvestor just takes in the pset
-// MuonGEMDigisHarvestor::MuonGEMDigisHarvestor(const edm::ParameterSet& pset)
-//    : MuonGEMBaseHarvestor(pset, "MuonGEMDigisHarvestor") {
-//
-// Below is the contructor type in CSCALCTDigiValidation
-CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &inputTag, edm::ConsumesCollector &&iC)
+// Question on constructor: Can I retrieve the inputTag immediately from the pset? I need to initialize the CSCBaseValidation with the IT.
+CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &inputTag, const edm::ParameterSet& pset, edm::ConsumesCollector &&iC)
     : CSCBaseValidation(inputTag), theTimeBinPlots(), theNDigisPerLayerPlots() {
   alcts_Token_ = iC.consumes<CSCALCTDigiCollection>(inputTag);
-  // And that's it. But I have a feeling I need more...like PSets
-  // Also I don't understand what these 'consumes' thing works
+  clcts_Token_ = iC.consumes<CSCCLCTDigiCollection>(inputTag);
+  mplcts_Token_ = iC.consumes<CSCMPLCTDigiCollection>(inputTag);
+  // Again how do I get the input tag from the PS?
 
   // Below is what the MuonGEMDigisHarvestor has. I think I will need this kind of information...
   // region_ids_ = pset.getUntrackedParameter<std::vector<Int_t> >("regionIds");
@@ -41,6 +36,7 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &in
   // clctToken_ = iC.consumes<CSCCLCTDigiCollection>(cscCLCT.getParameter<edm::InputTag>("inputTag"));
   // <and the other three
   // geomToken_ = iC.esConsumes<CSCGeometry, MuonGeometryRecord>();
+  cscStubMatcher_ = CSCStubMatcher(pset, iC);
 }
 
 CSCStubEfficiencyValidation::~CSCStubEfficiencyValidation() {}
@@ -62,7 +58,7 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
 }
 
 // Similarly, I am doing what CSCALCTDigiValidation does.
-void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventSetup &) {
+void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventSetup &eventSetup, const edm::ParameterSet& pset) {
   edm::Handle<CSCALCTDigiCollection> alcts;
   // Probably also want a handle for clcts and lcts
 
@@ -92,4 +88,28 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   // So what needs to happen here is that I need to grab the stub info by layer/chanberType as above.
   // Then I need to match things (idk how) and then also fill plots with what got matched.
   // Then idk if I have to do the division by hand to get the efficiencies or if I can use an existing function
+
+  const auto& simVertex = ps.getParameter<edm::ParameterSet>("simVertex");
+  const auto& simTrack = ps.getParameter<edm::ParameterSet>("simTrack");
+  simTrackInput_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("inputTag"));
+  simTrackMinPt_ = simTrack.getParameter<double>("minPt");
+  simTrackMinEta_ = simTrack.getParameter<double>("minEta");
+  simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
+
+  cscStubMatcher_.init(e,eventSetup);
+  cscStubMatcher_.match(simTrack,simVertex);
+  std::map<unsigned int, CSCCLCTDigiContainer> alcts = cscStubMatcher_.alcts();
+  std::map<unsigned int, CSCCLCTDigiContainer> clcts = cscStubMatcher_.clcts();
+  std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts = cscStubMatcher_.lcts();
+  std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_.mplcts();
+
+  // number of chambIDs is 10?
+  for(int chambID = 0; chambID<10; chambID++) {
+    if (alcts.contains(chambID)) {
+      pass;
+    }
+  }
+
+  for 
+  
 }
