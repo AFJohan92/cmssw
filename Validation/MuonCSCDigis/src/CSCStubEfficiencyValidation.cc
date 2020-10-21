@@ -26,7 +26,7 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &in
   alcts_Token_ = iC.consumes<CSCALCTDigiCollection>(inputTag);
   clcts_Token_ = iC.consumes<CSCCLCTDigiCollection>(inputTag);
   lcts_Token_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(inputTag);
-  mplcts_Token_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(inputTag);
+  //mplcts_Token_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(inputTag);
   // Again how do I get the input tag from the PS? As in, do I need both arguments or can I get PS from the inputTag?
   // Could it be the way I did above?
 
@@ -82,7 +82,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   edm::Handle<CSCALCTDigiCollection> alcts;
   edm::Handle<CSCCLCTDigiCollection> clcts;
   edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-  edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
+  //edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
 
   // Use token to retreive event information
   e.getByToken(simTrackInput_, sim_tracks);
@@ -90,7 +90,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   e.getByToken(alcts_Token_, alcts);
   e.getByToken(clcts_Token_, clcts);
   e.getByToken(lcts_Token_, lcts);
-  e.getByToken(mplcts_Token_, lcts);
+  //e.getByToken(mplcts_Token_, lcts);
 
   // Initialize StubMatcher
   cscStubMatcher_->init(e,eventSetup);
@@ -109,9 +109,11 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   if (!lcts.isValid()) {
     edm::LogError("CSCDigiDump") << "Cannot get lcts by label " << theInputTag.encode();
   }
+  /*
   if (!mplcts.isValid()) {
     edm::LogError("CSCDigiDump") << "Cannot get mplcts by label " << theInputTag.encode();
   }
+  */
 
   // Test output
   std::cout << "Total number of SimTrack in this event: " << sim_track.size() << std::endl;
@@ -123,23 +125,33 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     sim_track_selected.push_back(t);
   }
 
-  // What should I do for the denominator?
-
-  // To build numerator: loop through good tracks, use corresponding vetrex to match stubs, then fill hists of chambers where the stub appears.
+  // Loop through good tracks, use corresponding vetrex to match stubs, then fill hists of chambers where the stub appears.
   for (const auto& t : sim_track_selected) {
     // Match track to stubs with appropriate vertex
     // Should this be done on the container, or on the entries of the container as done here?
     cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
+
+    
+    // denom: muons (sim_tracks) within a certain eta range that have >3(4) simhits in a chamber;
+    // eta ranges: 0.9 < |η| < 2.4
+    std::vector<float> etaRanges{0.9, 1.05, 1.2, 1.35, 1.5, 1.65, 1.8, 1.95, 2.1, 2.25, 2.4}; //size = nChambers+1; currently evenly spaced but this is wrong
+    for(int chambID = 0; chambID<10; chambID++) {
+      if(etaRanges[chambID] < t.momentum().eta() && etaRanges[chambID+1] > t.momentum().eta()) {
+	denominatorPlots[chambID]->Fill(1.);
+      }
+    }
 
     // Store matched stubs.
     // Key: ChamberID, Value : CSCStubDigiContainer
     std::map<unsigned int, CSCALCTDigiContainer> alcts = cscStubMatcher_->alcts();
     std::map<unsigned int, CSCCLCTDigiContainer> clcts = cscStubMatcher_->clcts();
     std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts = cscStubMatcher_->lcts();
-    std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_->mplcts();  
+    //std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_->mplcts();
 
-    // Loop over all (10?) ChamberIDs to make numerators and denominators for the efficiency
+    
+    //num: muons (sim_tracks) which also have a stub in that chamber
     for(int chambID = 0; chambID<10; chambID++) {
+      // I shouldn't do an eta cut right?
       if (alcts.find( chambID ) != alcts.end() && alcts[chambID].size() > 2) {
 	numeratorPlots[chambID]->Fill(1.);
       }
