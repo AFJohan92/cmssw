@@ -32,7 +32,7 @@ private:
   edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
   edm::EDGetTokenT<CSCCLCTDigiCollection> clcts_Token_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lcts_Token_;
-  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplcts_Token_;
+  //edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplcts_Token_;
 
   std::shared_ptr<CSCStubMatcher> cscStubMatcher_;
   //CSCStubMatcher cscStubMatcher_;
