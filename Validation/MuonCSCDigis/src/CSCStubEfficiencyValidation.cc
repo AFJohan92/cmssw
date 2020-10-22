@@ -59,17 +59,14 @@ CSCStubEfficiencyValidation::~CSCStubEfficiencyValidation() {}
 // I think what I'll need here is the 9 efficiency plots mentioned above: ALCT, CLCT, LCT x 3 (what these three are idk...)
 // Right now the code below does what CSCALCTDigiValidation does. Just 1+2*10=21 plots: 10xtime, 10xNDigis per layer, and 1xNDigisPerEvent.
 void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
-  /*
-  // Below is an example. Do I even need this function?
-  theNDigisPerEventPlot = iBooker.book1D("CSCALCTDigisPerEvent", "CSC ALCT Digis per event", 100, 0, 100);
-  for (int i = 0; i < 10; ++i) {
+  iBooker.setCurrentFolder("MuonCSCDigisV/CSCDigiTask");
+  for (int i = 0; i < 10; i++) {
     char title1[200], title2[200];
-    sprintf(title1, "CSCALCTDigiTimeType%d", i + 1);
-    sprintf(title2, "CSCALCTDigisPerLayerType%d", i + 1);
-    theTimeBinPlots[i] = iBooker.book1D(title1, title1, 20, 0, 20);
-    theNDigisPerLayerPlots[i] = iBooker.book1D(title2, title2, 100, 0, 20);
+    sprintf(title1, "CSCStubDigiNumerator%d", i);
+    sprintf(title2, "CSCStubDigiDenominator%d", i);
+    numeratorPlots[i] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
+    denominatorPlots[i] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
   }
-  */
 }
 
 /*
@@ -137,7 +134,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     std::vector<float> etaRanges{0.9, 1.05, 1.2, 1.35, 1.5, 1.65, 1.8, 1.95, 2.1, 2.25, 2.4}; //size = nChambers+1; currently evenly spaced but this is wrong
     for(int chambID = 0; chambID<10; chambID++) {
       if(etaRanges[chambID] < t.momentum().eta() && etaRanges[chambID+1] > t.momentum().eta()) {
-	denominatorPlots[chambID]->Fill(1.);
+	denominatorPlots[chambID]->Fill(t.momentum().eta());
       }
     }
 
@@ -153,7 +150,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     for(int chambID = 0; chambID<10; chambID++) {
       // I shouldn't do an eta cut right?
       if (alcts.find( chambID ) != alcts.end() && alcts[chambID].size() > 2) {
-	numeratorPlots[chambID]->Fill(1.);
+	numeratorPlots[chambID]->Fill(t.momentum().eta());
       }
     }
   }
