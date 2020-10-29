@@ -1,6 +1,14 @@
 import FWCore.ParameterSet.Config as cms
 
 muonCSCStubPSet = cms.PSet(
+    #csc pre-CLCT
+    cscCLCTPreTrigger = cms.PSet(
+        verbose = cms.int32(0),
+        inputTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
+        minBX = cms.int32(4),
+        maxBX = cms.int32(10),
+        minNHitsChamber = cms.int32(3),
+    ),
     #csc CLCT, central BX 7
     cscCLCT = cms.PSet(
         verbose = cms.int32(0),

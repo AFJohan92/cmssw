@@ -13,8 +13,10 @@
 
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCLCTPreTriggerCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 
+typedef std::vector<CSCCLCTPreTrigger> CSCCLCTPreTriggerContainer;
 typedef std::vector<CSCALCTDigi> CSCALCTDigiContainer;
 typedef std::vector<CSCCLCTDigi> CSCCLCTDigiContainer;
 typedef std::vector<CSCCorrelatedLCTDigi> CSCCorrelatedLCTDigiContainer;
@@ -38,6 +40,7 @@ public:
   std::set<unsigned int> chamberIdsAllMPLCT(int csc_type = MuonHitHelper::CSC_ALL) const;
 
   /// chamber detIds with matching stubs
+  std::set<unsigned int> chamberIdsPreCLCT(int csc_type = MuonHitHelper::CSC_ALL) const;
   std::set<unsigned int> chamberIdsCLCT(int csc_type = MuonHitHelper::CSC_ALL) const;
   std::set<unsigned int> chamberIdsALCT(int csc_type = MuonHitHelper::CSC_ALL) const;
   std::set<unsigned int> chamberIdsLCT(int csc_type = MuonHitHelper::CSC_ALL) const;
@@ -50,12 +53,14 @@ public:
   const CSCCorrelatedLCTDigiContainer& allMPLCTsInChamber(unsigned int) const;
 
   /// all matching from a particular crossed chamber
+  const CSCCLCTPreTriggerContainer& preClctsInChamber(unsigned int) const;
   const CSCCLCTDigiContainer& clctsInChamber(unsigned int) const;
   const CSCALCTDigiContainer& alctsInChamber(unsigned int) const;
   const CSCCorrelatedLCTDigiContainer& lctsInChamber(unsigned int) const;
   const CSCCorrelatedLCTDigiContainer& mplctsInChamber(unsigned int) const;
 
   /// all matching lcts
+  std::map<unsigned int, CSCCLCTPreTriggerContainer> preclcts() const { return chamber_to_preclcts_; }
   std::map<unsigned int, CSCCLCTDigiContainer> clcts() const { return chamber_to_clcts_; }
   std::map<unsigned int, CSCALCTDigiContainer> alcts() const { return chamber_to_alcts_; }
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts() const { return chamber_to_lcts_; }
@@ -85,6 +90,7 @@ public:
   std::shared_ptr<GEMDigiMatcher> gemDigiMatcher() { return gemDigiMatcher_; }
 
 private:
+  void matchCLCTPreTriggersToSimTrack(const CSCCLCTPreTriggerCollection&);
   void matchCLCTsToSimTrack(const CSCCLCTDigiCollection&);
   void matchALCTsToSimTrack(const CSCALCTDigiCollection&);
   void matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection&);
@@ -92,11 +98,13 @@ private:
 
   void clear();
 
+  edm::EDGetTokenT<CSCCLCTPreTriggerCollection> preclctToken_;
   edm::EDGetTokenT<CSCCLCTDigiCollection> clctToken_;
   edm::EDGetTokenT<CSCALCTDigiCollection> alctToken_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lctToken_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplctToken_;
 
+  edm::Handle<CSCCLCTPreTriggerCollection> preclctsH_;
   edm::Handle<CSCCLCTDigiCollection> clctsH_;
   edm::Handle<CSCALCTDigiCollection> alctsH_;
   edm::Handle<CSCCorrelatedLCTDigiCollection> lctsH_;
@@ -115,6 +123,7 @@ private:
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamber_to_mplcts_all_;
 
   // all matching stubs in crossed chambers with digis
+  std::map<unsigned int, CSCCLCTPreTriggerContainer> chamber_to_preclcts_;
   std::map<unsigned int, CSCCLCTDigiContainer> chamber_to_clcts_;
   std::map<unsigned int, CSCALCTDigiContainer> chamber_to_alcts_;
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamber_to_lcts_;
@@ -128,19 +137,23 @@ private:
   int minNHitsChamber_;
   int minNHitsChamberALCT_;
   int minNHitsChamberCLCT_;
+  int minNHitsChamberPreCLCT_;
   int minNHitsChamberLCT_;
   int minNHitsChamberMPLCT_;
 
   bool verboseALCT_;
   bool verboseCLCT_;
+  bool verbosePreCLCT_;
   bool verboseLCT_;
   bool verboseMPLCT_;
 
+  int minBXPreCLCT_, maxBXPreCLCT_;
   int minBXCLCT_, maxBXCLCT_;
   int minBXALCT_, maxBXALCT_;
   int minBXLCT_, maxBXLCT_;
   int minBXMPLCT_, maxBXMPLCT_;
 
+  CSCCLCTPreTriggerContainer no_preclcts_;
   CSCCLCTDigiContainer no_clcts_;
   CSCALCTDigiContainer no_alcts_;
   CSCCorrelatedLCTDigiContainer no_lcts_;

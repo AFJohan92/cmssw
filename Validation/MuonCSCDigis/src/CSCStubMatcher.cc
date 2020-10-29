@@ -5,6 +5,12 @@
 using namespace std;
 
 CSCStubMatcher::CSCStubMatcher(const edm::ParameterSet& pSet, edm::ConsumesCollector&& iC) {
+  const auto& cscPreCLCT = pSet.getParameter<edm::ParameterSet>("cscCLCTPreTrigger");
+  minBXPreCLCT_ = cscPreCLCT.getParameter<int>("minBX");
+  maxBXPreCLCT_ = cscPreCLCT.getParameter<int>("maxBX");
+  verbosePreCLCT_ = cscPreCLCT.getParameter<int>("verbose");
+  minNHitsChamberPreCLCT_ = cscPreCLCT.getParameter<int>("minNHitsChamber");
+
   const auto& cscCLCT = pSet.getParameter<edm::ParameterSet>("cscCLCT");
   minBXCLCT_ = cscCLCT.getParameter<int>("minBX");
   maxBXCLCT_ = cscCLCT.getParameter<int>("maxBX");
@@ -33,6 +39,7 @@ CSCStubMatcher::CSCStubMatcher(const edm::ParameterSet& pSet, edm::ConsumesColle
   gemDigiMatcher_.reset(new GEMDigiMatcher(pSet, std::move(iC)));
   cscDigiMatcher_.reset(new CSCDigiMatcher(pSet, std::move(iC)));
 
+  preclctToken_ = iC.consumes<CSCCLCTPreTriggerCollection>(cscCLCT.getParameter<edm::InputTag>("inputTag"));
   clctToken_ = iC.consumes<CSCCLCTDigiCollection>(cscCLCT.getParameter<edm::InputTag>("inputTag"));
   alctToken_ = iC.consumes<CSCALCTDigiCollection>(cscALCT.getParameter<edm::InputTag>("inputTag"));
   lctToken_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(cscLCT.getParameter<edm::InputTag>("inputTag"));
@@ -45,6 +52,7 @@ void CSCStubMatcher::init(const edm::Event& iEvent, const edm::EventSetup& iSetu
   gemDigiMatcher_->init(iEvent, iSetup);
   cscDigiMatcher_->init(iEvent, iSetup);
 
+  iEvent.getByToken(preclctToken_, preclctsH_);
   iEvent.getByToken(clctToken_, clctsH_);
   iEvent.getByToken(alctToken_, alctsH_);
   iEvent.getByToken(lctToken_, lctsH_);
@@ -59,6 +67,7 @@ void CSCStubMatcher::match(const SimTrack& t, const SimVertex& v) {
   gemDigiMatcher_->match(t, v);
   cscDigiMatcher_->match(t, v);
 
+  const CSCCLCTPreTriggerCollection& preclcts = *preclctsH_.product();
   const CSCCLCTDigiCollection& clcts = *clctsH_.product();
   const CSCALCTDigiCollection& alcts = *alctsH_.product();
   const CSCCorrelatedLCTDigiCollection& lcts = *lctsH_.product();
@@ -67,10 +76,50 @@ void CSCStubMatcher::match(const SimTrack& t, const SimVertex& v) {
   // clear collections
   clear();
 
+  matchCLCTPreTriggersToSimTrack(preclcts);
   matchCLCTsToSimTrack(clcts);
   matchALCTsToSimTrack(alcts);
   matchLCTsToSimTrack(lcts);
   matchMPLCTsToSimTrack(mplcts);
+}
+
+void CSCStubMatcher::matchCLCTPreTriggersToSimTrack(const CSCCLCTPreTriggerCollection& preclcts) {
+  const auto& cathode_ids = cscDigiMatcher_->chamberIdsStrip(0);
+
+  for (const auto& id : cathode_ids) {
+    CSCDetId ch_id(id);
+    if (verboseCLCT_) {
+      edm::LogInfo("CSCStubMatcher") << "To check CSC chamber " << ch_id;
+    }
+
+    int ring = ch_id.ring();
+
+    // do not consider CSCs with too few hits
+    if (cscDigiMatcher_->nLayersWithStripInChamber(ch_id) < minNHitsChamberPreCLCT_)
+      continue;
+
+    //use ME1b id to get CLCTs
+    const bool isME1a(ch_id.station() == 1 and ch_id.ring() == 4);
+    if (isME1a)
+      ring = 1;
+    CSCDetId ch_id2(ch_id.endcap(), ch_id.station(), ring, ch_id.chamber(), 0);
+
+    const auto& preclcts_in_det = preclcts.get(ch_id2);
+
+    for (auto c = preclcts_in_det.first; c != preclcts_in_det.second; ++c) {
+      if (verbosePreCLCT_)
+        edm::LogInfo("CSCStubMatcher") << "preclct " << ch_id2 << " " << *c;
+
+      // check that the BX for this stub wasn't too early or too late
+      if (*c < minBXPreCLCT_ || *c > maxBXPreCLCT_)
+        continue;
+
+      // store matching PreCLCTs in this chamber
+      if (std::find(chamber_to_preclcts_[id].begin(), chamber_to_preclcts_[id].end(), *c) == chamber_to_preclcts_[id].end()) {
+        chamber_to_preclcts_[id].push_back(*c);
+      }
+    }
+  }
 }
 
 void CSCStubMatcher::matchCLCTsToSimTrack(const CSCCLCTDigiCollection& clcts) {
