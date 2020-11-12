@@ -39,6 +39,7 @@ private:
 
   MonitorElement *numeratorPlots[10];
   MonitorElement *denominatorPlots[10];
+  MonitorElement *testHist;
 
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
   edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_;

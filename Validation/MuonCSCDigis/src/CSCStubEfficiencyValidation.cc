@@ -67,6 +67,7 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
     numeratorPlots[i] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
     denominatorPlots[i] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
   }
+  testHist = iBooker.book1D("CSCStubDigiTest", "CSCStubDigiTest", 50, -2.5, 2.5);
 }
 
 /*
@@ -121,19 +122,22 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
       continue;
     sim_track_selected.push_back(t);
   }
+  std::cout << "Good simTracks: " << sim_track_selected.size() << std::endl;
 
   // Loop through good tracks, use corresponding vetrex to match stubs, then fill hists of chambers where the stub appears.
   for (const auto& t : sim_track_selected) {
+    testHist->Fill(t.momentum().eta());
     // Match track to stubs with appropriate vertex
     // Should this be done on the container, or on the entries of the container as done here?
     cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
-
+    std::cout << "Matched track eta: " << t.momentum().eta() << std::endl;
     
     // denom: muons (sim_tracks) within a certain eta range that have >3(4) simhits in a chamber;
     // eta ranges: 0.9 < |η| < 2.4
     std::vector<float> etaRanges{0.9, 1.05, 1.2, 1.35, 1.5, 1.65, 1.8, 1.95, 2.1, 2.25, 2.4}; //size = nChambers+1; currently evenly spaced but this is wrong
     for(int chambID = 0; chambID<10; chambID++) {
-      if(etaRanges[chambID] < t.momentum().eta() && etaRanges[chambID+1] > t.momentum().eta()) {
+      if(etaRanges[chambID] < std::abs(t.momentum().eta()) && etaRanges[chambID+1] > std::abs(t.momentum().eta())) {
+	std::cout << "In chamber " << chambID << std::endl; 
 	denominatorPlots[chambID]->Fill(t.momentum().eta());
       }
     }
@@ -147,10 +151,17 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
 
     
     //num: muons (sim_tracks) which also have a stub in that chamber
+    std::cout << "Size of alcts container: " << alcts.size() << std::endl;
+    for (const auto& s : alcts ) {
+      std::cout << s.first << std::endl;
+    }
     for(int chambID = 0; chambID<10; chambID++) {
       // I shouldn't do an eta cut right?
-      if (alcts.find( chambID ) != alcts.end() && alcts[chambID].size() > 2) {
-	numeratorPlots[chambID]->Fill(t.momentum().eta());
+      if (alcts.find( chambID ) != alcts.end()) {
+	std::cout << "Size of alcts in chambID: " << alcts[chambID].size() << " " << chambID << std::endl;
+	if (alcts[chambID].size() > 2) {
+	  numeratorPlots[chambID]->Fill(t.momentum().eta());
+	}
       }
     }
   }
