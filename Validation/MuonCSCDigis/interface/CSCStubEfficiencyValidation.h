@@ -15,6 +15,10 @@
 
 #include "Validation/MuonCSCDigis/interface/CSCBaseValidation.h"
 
+#include <map>
+#include <string>
+#include <tuple>
+
 class CSCStubEfficiencyValidation : public CSCBaseValidation {
 public:
   CSCStubEfficiencyValidation(const edm::InputTag &inputTag, const edm::ParameterSet& pset, edm::ConsumesCollector &&iC);
@@ -37,8 +41,8 @@ private:
   std::shared_ptr<CSCStubMatcher> cscStubMatcher_;
   //CSCStubMatcher cscStubMatcher_;
 
-  MonitorElement *numeratorPlots[10];
-  MonitorElement *denominatorPlots[10];
+  MonitorElement *numeratorPlots[18];
+  MonitorElement *denominatorPlots[18];
   MonitorElement *testHist;
 
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
@@ -46,6 +50,10 @@ private:
   double simTrackMinPt_;
   double simTrackMinEta_;
   double simTrackMaxEta_;
+  
+  std::map<std::string,std::tuple<float,float>> etaRanges;
+  std::map<std::string, int> chamberCounterMap;
+  std::map<std::string, std::vector<double>> chambIdsInEndCapStationRings;
 };
 
 #endif
