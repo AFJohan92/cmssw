@@ -22,6 +22,7 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &in
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
   simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
+  std::cout<<"MIN_ETA: "<<simTrackMinEta_<<", MAX_ETA: "<<simTrackMaxEta_<<std::endl;
 
   alcts_Token_ = iC.consumes<CSCALCTDigiCollection>(inputTag);
   clcts_Token_ = iC.consumes<CSCCLCTDigiCollection>(inputTag);
@@ -51,6 +52,54 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag &in
   // clctToken_ = iC.consumes<CSCCLCTDigiCollection>(cscCLCT.getParameter<edm::InputTag>("inputTag"));
   // <and the other three
   // geomToken_ = iC.esConsumes<CSCGeometry, MuonGeometryRecord>();
+
+  chambIdsInEndCapStationRings.clear();
+  chamberCounterMap.clear();
+  int chamberCounter = 0;
+  for (int endcap = 1; endcap <= 2; endcap++) {
+    for (int station = 1; station <= 4; station++) {
+      for (int ring = 1; ring <= 3; ring++) {
+	if (ring==3 && station > 1) continue;	// Only station 1 has 3 rings
+	std::vector<double> listOfChambers;
+	for (int chamber=1; chamber<=36; chamber++) {
+	  CSCDetId ch_id(endcap,station,ring,chamber,0);
+	  listOfChambers.push_back(double(ch_id.chamberId()));
+	}
+	chambIdsInEndCapStationRings.insert({std::to_string(endcap)+std::to_string(station)+std::to_string(ring),listOfChambers});
+	chamberCounterMap.insert({std::to_string(endcap)+std::to_string(station)+std::to_string(ring),chamberCounter});
+	chamberCounter++;
+      }
+    }
+  }
+
+  etaRanges.clear();
+  // ME1/1
+  etaRanges.insert({"111",std::tuple(1.6,2.5)});
+  etaRanges.insert({"211",std::tuple(-2.5,-1.6)});
+  // ME1/2
+  etaRanges.insert({"112",std::tuple(1.2,1.7)});
+  etaRanges.insert({"212",std::tuple(-1.7,-1.2)});
+  // ME1/3
+  etaRanges.insert({"113",std::tuple(0.9,1.1)});
+  etaRanges.insert({"213",std::tuple(-1.1,-0.9)});
+  // ME2/1
+  etaRanges.insert({"121",std::tuple(1.6,2.5)});
+  etaRanges.insert({"221",std::tuple(-2.5,-1.6)});
+  // ME2/2
+  etaRanges.insert({"122",std::tuple(1.0,1.6)});
+  etaRanges.insert({"222",std::tuple(-1.6,-1.0)});
+  // ME3/1
+  etaRanges.insert({"131",std::tuple(1.7,2.5)});
+  etaRanges.insert({"231",std::tuple(-2.5,-1.7)});
+  // ME3/2
+  etaRanges.insert({"132",std::tuple(1.1,1.7)});
+  etaRanges.insert({"232",std::tuple(-1.7,-1.1)});
+  // ME4/1
+  etaRanges.insert({"141",std::tuple(1.8,2.5)});
+  etaRanges.insert({"241",std::tuple(-2.5,-1.8)});
+  // ME4/2
+  etaRanges.insert({"142",std::tuple(1.2,1.8)});
+  etaRanges.insert({"242",std::tuple(-1.8,-1.2)});
 }
 
 CSCStubEfficiencyValidation::~CSCStubEfficiencyValidation() {}
@@ -60,13 +109,29 @@ CSCStubEfficiencyValidation::~CSCStubEfficiencyValidation() {}
 // Right now the code below does what CSCALCTDigiValidation does. Just 1+2*10=21 plots: 10xtime, 10xNDigis per layer, and 1xNDigisPerEvent.
 void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
   iBooker.setCurrentFolder("MuonCSCDigisV/CSCDigiTask");
-  for (int i = 0; i < 10; i++) {
-    char title1[200], title2[200];
-    sprintf(title1, "CSCStubDigiNumerator%d", i);
-    sprintf(title2, "CSCStubDigiDenominator%d", i);
-    numeratorPlots[i] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
-    denominatorPlots[i] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
+  int plotCounter = 0;
+  for (int endcap = 1; endcap <= 2; endcap++) {
+    // Total of 252 plots per station
+    for (int station = 1; station <= 4; station++) {
+      // Only station 1 has 3 rings
+      for (int ring = 1; ring <= 3; ring++) {
+	if (ring==3 && station > 1) continue;
+	// 36 chambers in rings 2 and 3, 18 in ring 1.
+	//for (int chamber = 1; chamber <= 36; chamber++) {
+	//if (station > 1 && ring == 1 && chamber > 18) continue;
+	//char title1[200], title2[200];
+	//sprintf(title1, "CSCStubDigiNumeratorEndCap"+endcap+"Station"+station+"Ring"+ring);
+	//sprintf(title2, "CSCStubDigiDenominatorEndCap"+endcap+"Station"+station+"Ring"+ring);
+	std::string title1 = "CSCStubDigiNumeratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+	std::string title2 = "CSCStubDigiDenominatoratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+	numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
+	denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
+	plotCounter++;
+	//}
+      }
+    }
   }
+  std::cout<<"Total plots: "<<plotCounter+1<<std::endl;
   testHist = iBooker.book1D("CSCStubDigiTest", "CSCStubDigiTest", 50, -2.5, 2.5);
 }
 
@@ -93,11 +158,9 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
   // Initialize StubMatcher
   cscStubMatcher_->init(e,eventSetup);
   
-  // Not sure what this does, does it flatten the track/vertex container?
   const edm::SimTrackContainer& sim_track = *sim_tracks.product();
   const edm::SimVertexContainer& sim_vert = *sim_vertices.product();
   
-  // Not sure where this 'theInputTag' is coming from...
   if (!alcts.isValid()) {
     edm::LogError("CSCDigiDump") << "Cannot get alcts by label " << theInputTag.encode();
   }
@@ -123,22 +186,34 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     sim_track_selected.push_back(t);
   }
   std::cout << "Good simTracks: " << sim_track_selected.size() << std::endl;
+  if (sim_track_selected.size() == 0) {
+    std::cout<<"No matched simtracks, skip event"<<std::endl;
+    return;
+  }
 
   // Loop through good tracks, use corresponding vetrex to match stubs, then fill hists of chambers where the stub appears.
   for (const auto& t : sim_track_selected) {
-    testHist->Fill(t.momentum().eta());
     // Match track to stubs with appropriate vertex
-    // Should this be done on the container, or on the entries of the container as done here?
     cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
+    if (std::abs(t.momentum().eta()) < 0.9 || std::abs(t.momentum().eta()) > 2.5) continue;
     std::cout << "Matched track eta: " << t.momentum().eta() << std::endl;
     
     // denom: muons (sim_tracks) within a certain eta range that have >3(4) simhits in a chamber;
-    // eta ranges: 0.9 < |η| < 2.4
-    std::vector<float> etaRanges{0.9, 1.05, 1.2, 1.35, 1.5, 1.65, 1.8, 1.95, 2.1, 2.25, 2.4}; //size = nChambers+1; currently evenly spaced but this is wrong
-    for(int chambID = 0; chambID<10; chambID++) {
-      if(etaRanges[chambID] < std::abs(t.momentum().eta()) && etaRanges[chambID+1] > std::abs(t.momentum().eta())) {
-	std::cout << "In chamber " << chambID << std::endl; 
-	denominatorPlots[chambID]->Fill(t.momentum().eta());
+    for (int endcap = 1; endcap <= 2; endcap++) {
+      for (int station = 1; station <= 4; station++) {
+	for (int ring = 1; ring <= 3; ring++) {
+	  if (ring==3 && station > 1) continue;
+	  std::tuple etaTuple = etaRanges[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)];
+	  if (std::get<0>(etaTuple) < t.momentum().eta() && t.momentum().eta() < std::get<1>(etaTuple)) {
+	    std::string outputString = "In endcap "+std::to_string(endcap)+", station "+std::to_string(station)+", ring "+std::to_string(ring)+", chambers";
+	    std::vector<double> theseChambers = chambIdsInEndCapStationRings[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)];
+	    for (int i = 0; double(i)<double(theseChambers.size()); i++) {
+	      outputString = outputString + " " + std::to_string(theseChambers[i]);
+	    }
+	    std::cout << outputString << std::endl;
+	    denominatorPlots[chamberCounterMap[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)]]->Fill(t.momentum().eta());
+	  }
+	}
       }
     }
 
@@ -151,16 +226,39 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
 
     
     //num: muons (sim_tracks) which also have a stub in that chamber
-    std::cout << "Size of alcts container: " << alcts.size() << std::endl;
-    for (const auto& s : alcts ) {
-      std::cout << s.first << std::endl;
+    //std::cout << "Size of alcts container: " << alcts.size() << std::endl;
+    //for (const auto& s : alcts ) {
+    //  CSCDetId ch_id(s.first);
+    //  std::cout << s.first << ch_id << std::endl;
+    //}
+
+    for (auto& [myKey, myValue]: alcts) {
+      std::cout << myKey << " is in alcts, with this many elements " << myValue.size() << std::endl;
     }
-    for(int chambID = 0; chambID<10; chambID++) {
-      // I shouldn't do an eta cut right?
-      if (alcts.find( chambID ) != alcts.end()) {
-	std::cout << "Size of alcts in chambID: " << alcts[chambID].size() << " " << chambID << std::endl;
-	if (alcts[chambID].size() > 2) {
-	  numeratorPlots[chambID]->Fill(t.momentum().eta());
+    
+    for (int endcap = 1; endcap <= 2; endcap++) {
+      for (int station = 1; station <= 4; station++) {
+	// Only station 1 has 3 rings
+	for (int ring = 1; ring <= 3; ring++) {
+	  if (ring==3 && station > 1) continue;
+	  // 36 chambers in rings 2 and 3, 18 in ring 1.
+	  //for (int chamber = 1; chamber <= 36; chamber++) {
+	  //if (ring == 1 && chamber > 18) continue;
+	  std::vector<double> listOfChambers = chambIdsInEndCapStationRings[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)];
+	  std::cout<<"Length of chamber list: "<<listOfChambers.size()<<", and first is "<<listOfChambers[0]<<std::endl;
+	  for (auto chambID : listOfChambers ) {
+	    for (auto& [myKey, myValue]: alcts) {
+	      std::cout<<"Try "<<myKey<<" and "<<chambID<<std::endl;
+	      if (double(myKey) == chambID ) {
+		std::cout<<"Found it at "<<chambID<<", with this many alcts: "<<myValue.size()<<std::endl;
+		testHist->Fill(myValue.size());
+		if (myValue.size() > 2) {
+		  std::cout<<"Made it at "<<chambID<<std::endl;
+		  numeratorPlots[chamberCounterMap[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)]]->Fill(t.momentum().eta());
+		}
+	      }
+	    }
+	  }
 	}
       }
     }
