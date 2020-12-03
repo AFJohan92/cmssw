@@ -124,8 +124,10 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
 	//sprintf(title2, "CSCStubDigiDenominatorEndCap"+endcap+"Station"+station+"Ring"+ring);
 	std::string title1 = "CSCStubDigiNumeratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
 	std::string title2 = "CSCStubDigiDenominatoratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+	std::string title2 = "CSCStubDigiEfficienciesEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
 	numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
 	denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
+	efficiencyPlots[plotCounter] = iBooker.book1D(title3, title3, 50, -2.5, 2.5);
 	plotCounter++;
 	//}
       }
@@ -248,14 +250,14 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
 	  std::cout<<"Length of chamber list: "<<listOfChambers.size()<<", and first is "<<listOfChambers[0]<<std::endl;
 	  for (auto chambID : listOfChambers ) {
 	    for (auto& [myKey, myValue]: alcts) {
-	      std::cout<<"Try "<<myKey<<" and "<<chambID<<std::endl;
-	      if (double(myKey) == chambID ) {
-		std::cout<<"Found it at "<<chambID<<", with this many alcts: "<<myValue.size()<<std::endl;
+	      std::cout<<"Try myKey and chambID: "<<int(myKey)<<" and "<<int(chambID)<<std::endl;
+	      if (int(myKey) == int(chambID) ) {
+		std::cout<<"Found myKey "<<int(myKey)<<" at chambID "<<int(chambID)<<", with this many alcts: "<<myValue.size()<<std::endl;
 		testHist->Fill(myValue.size());
-		if (myValue.size() > 2) {
-		  std::cout<<"Made it at "<<chambID<<std::endl;
-		  numeratorPlots[chamberCounterMap[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)]]->Fill(t.momentum().eta());
-		}
+		//if (myValue.size() > 2) {
+		std::cout<<"Filling numerator for chambID "<<int(chambID)<<"at ring "<<std::to_string(endcap)+std::to_string(station)+std::to_string(ring)<<std::endl;
+		numeratorPlots[chamberCounterMap[std::to_string(endcap)+std::to_string(station)+std::to_string(ring)]]->Fill(t.momentum().eta());
+		  //}
 	      }
 	    }
 	  }
