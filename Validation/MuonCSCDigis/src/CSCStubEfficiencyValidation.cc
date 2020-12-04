@@ -115,21 +115,21 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker &iBooker) {
     for (int station = 1; station <= 4; station++) {
       // Only station 1 has 3 rings
       for (int ring = 1; ring <= 3; ring++) {
-	if (ring==3 && station > 1) continue;
-	// 36 chambers in rings 2 and 3, 18 in ring 1.
-	//for (int chamber = 1; chamber <= 36; chamber++) {
-	//if (station > 1 && ring == 1 && chamber > 18) continue;
-	//char title1[200], title2[200];
-	//sprintf(title1, "CSCStubDigiNumeratorEndCap"+endcap+"Station"+station+"Ring"+ring);
-	//sprintf(title2, "CSCStubDigiDenominatorEndCap"+endcap+"Station"+station+"Ring"+ring);
-	std::string title1 = "CSCStubDigiNumeratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
-	std::string title2 = "CSCStubDigiDenominatoratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
-	std::string title2 = "CSCStubDigiEfficienciesEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
-	numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
-	denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
-	efficiencyPlots[plotCounter] = iBooker.book1D(title3, title3, 50, -2.5, 2.5);
-	plotCounter++;
-	//}
+        if (ring==3 && station > 1) continue;
+        // 36 chambers in rings 2 and 3, 18 in ring 1.
+        //for (int chamber = 1; chamber <= 36; chamber++) {
+        //if (station > 1 && ring == 1 && chamber > 18) continue;
+        //char title1[200], title2[200];
+        //sprintf(title1, "CSCStubDigiNumeratorEndCap"+endcap+"Station"+station+"Ring"+ring);
+        //sprintf(title2, "CSCStubDigiDenominatorEndCap"+endcap+"Station"+station+"Ring"+ring);
+        std::string title1 = "CSCStubDigiNumeratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+        std::string title2 = "CSCStubDigiDenominatoratorEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+        std::string title3 = "CSCStubDigiEfficienciesEndCap"+std::to_string(endcap)+"Station"+std::to_string(station)+"Ring"+std::to_string(ring);
+        numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 50, -2.5, 2.5);
+        denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 50, -2.5, 2.5);
+        efficiencyPlots[plotCounter] = iBooker.book1D(title3, title3, 50, -2.5, 2.5);
+        plotCounter++;
+        //}
       }
     }
   }
@@ -159,10 +159,10 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
 
   // Initialize StubMatcher
   cscStubMatcher_->init(e,eventSetup);
-  
+
   const edm::SimTrackContainer& sim_track = *sim_tracks.product();
   const edm::SimVertexContainer& sim_vert = *sim_vertices.product();
-  
+
   if (!alcts.isValid()) {
     edm::LogError("CSCDigiDump") << "Cannot get alcts by label " << theInputTag.encode();
   }
@@ -199,7 +199,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
     if (std::abs(t.momentum().eta()) < 0.9 || std::abs(t.momentum().eta()) > 2.5) continue;
     std::cout << "Matched track eta: " << t.momentum().eta() << std::endl;
-    
+
     // denom: muons (sim_tracks) within a certain eta range that have >3(4) simhits in a chamber;
     for (int endcap = 1; endcap <= 2; endcap++) {
       for (int station = 1; station <= 4; station++) {
@@ -226,7 +226,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     std::map<unsigned int, CSCCorrelatedLCTDigiContainer> lcts = cscStubMatcher_->lcts();
     //std::map<unsigned int, CSCCorrelatedLCTDigiContainer> mplcts = cscStubMatcher_->mplcts();
 
-    
+
     //num: muons (sim_tracks) which also have a stub in that chamber
     //std::cout << "Size of alcts container: " << alcts.size() << std::endl;
     //for (const auto& s : alcts ) {
@@ -237,7 +237,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event &e, const edm::EventS
     for (auto& [myKey, myValue]: alcts) {
       std::cout << myKey << " is in alcts, with this many elements " << myValue.size() << std::endl;
     }
-    
+
     for (int endcap = 1; endcap <= 2; endcap++) {
       for (int station = 1; station <= 4; station++) {
 	// Only station 1 has 3 rings

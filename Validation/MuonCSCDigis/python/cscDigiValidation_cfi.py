@@ -5,9 +5,10 @@ from Validation.MuonCSCDigis.muonCSCDigiPSet import *
 from Validation.MuonGEMDigis.muonGEMDigiPSet import *
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-cscDigiValidation = DQMEDAnalyzer('CSCDigiValidation',
-    muonSimHitMatcherPSet,                                                                                                                                     
-    muonCSCStubPSet,                                                                                                                                           
+cscDigiValidation = DQMEDAnalyzer(
+    'CSCDigiValidation',
+    muonSimHitMatcherPSet,
+    muonCSCStubPSet,
     muonCSCDigiPSet,
     muonGEMDigiPSet,
     simHitsTag = cms.InputTag("mix", "g4SimHitsMuonCSCHits"),

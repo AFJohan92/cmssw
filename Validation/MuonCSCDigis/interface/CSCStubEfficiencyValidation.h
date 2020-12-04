@@ -32,17 +32,17 @@ public:
 
 private:
   bool isSimTrackGood(const SimTrack& t);
-  
+
   edm::EDGetTokenT<CSCALCTDigiCollection> alcts_Token_;
   edm::EDGetTokenT<CSCCLCTDigiCollection> clcts_Token_;
   edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lcts_Token_;
   //edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplcts_Token_;
 
   std::shared_ptr<CSCStubMatcher> cscStubMatcher_;
-  //CSCStubMatcher cscStubMatcher_;
 
   MonitorElement *numeratorPlots[18];
   MonitorElement *denominatorPlots[18];
+  MonitorElement *efficiencyPlots[18];
   MonitorElement *testHist;
 
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
@@ -50,7 +50,7 @@ private:
   double simTrackMinPt_;
   double simTrackMinEta_;
   double simTrackMaxEta_;
-  
+
   std::map<std::string,std::tuple<float,float>> etaRanges;
   std::map<std::string, int> chamberCounterMap;
   std::map<std::string, std::vector<double>> chambIdsInEndCapStationRings;
