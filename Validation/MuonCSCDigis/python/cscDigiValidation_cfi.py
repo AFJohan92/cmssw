@@ -19,7 +19,6 @@ cscDigiValidation = DQMEDAnalyzer(
     alctDigiTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
     clctDigiTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
     stubEfficiencyTag = cms.InputTag("simCscTriggerPrimitiveDigis"),
-    #addGhosts = cms.bool(True),
     doSim = cms.bool(False)
     #And GEM matcher?
 )

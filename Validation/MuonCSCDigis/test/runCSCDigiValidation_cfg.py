@@ -23,9 +23,11 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 # Input source
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-        'file:input.root'
+process.source = cms.Source(
+    "PoolSource",
+fileNames = cms.untracked.vstring(
+    "/store/relval/CMSSW_11_2_0_pre7/RelValSingleMuPt10/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v8-v1/20000/0ED98457-2CEC-924D-AAFC-4F3F705C2DCC.root"
+                                      #'file:input.root'
     ),
     secondaryFileNames = cms.untracked.vstring()
 )
@@ -35,7 +37,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '')
 
 # Path and EndPath definitions
-process.validation_step = cms.Path(process.cscDigiValidation)
+process.validation_step = cms.Path(process.mix * process.cscDigiValidation)
 process.harvesting_step = cms.Path(process.cscDigiHarvesting)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 

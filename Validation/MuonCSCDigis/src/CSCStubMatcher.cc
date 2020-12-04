@@ -115,7 +115,8 @@ void CSCStubMatcher::matchCLCTPreTriggersToSimTrack(const CSCCLCTPreTriggerColle
         continue;
 
       // store matching PreCLCTs in this chamber
-      if (std::find(chamber_to_preclcts_[id].begin(), chamber_to_preclcts_[id].end(), *c) == chamber_to_preclcts_[id].end()) {
+      if (std::find(chamber_to_preclcts_[id].begin(), chamber_to_preclcts_[id].end(), *c) ==
+          chamber_to_preclcts_[id].end()) {
         chamber_to_preclcts_[id].push_back(*c);
       }
     }

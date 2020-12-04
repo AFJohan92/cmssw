@@ -18,8 +18,7 @@ CSCDigiValidation::CSCDigiValidation(const edm::ParameterSet &ps)
       theComparatorDigiValidation(nullptr),
       theALCTDigiValidation(nullptr),
       theCLCTDigiValidation(nullptr),
-      theStubEfficiencyValidation(nullptr)
- {
+      theStubEfficiencyValidation(nullptr) {
   theStripDigiValidation =
       std::make_unique<CSCStripDigiValidation>(ps.getParameter<edm::InputTag>("stripDigiTag"), consumesCollector());
   theWireDigiValidation = std::make_unique<CSCWireDigiValidation>(
@@ -32,8 +31,8 @@ CSCDigiValidation::CSCDigiValidation(const edm::ParameterSet &ps)
       std::make_unique<CSCALCTDigiValidation>(ps.getParameter<edm::InputTag>("alctDigiTag"), consumesCollector());
   theCLCTDigiValidation =
       std::make_unique<CSCCLCTDigiValidation>(ps.getParameter<edm::InputTag>("clctDigiTag"), consumesCollector());
-  theStubEfficiencyValidation = 
-    std::make_unique<CSCStubEfficiencyValidation>(ps.getParameter<edm::InputTag>("stubEfficiencyTag"), ps, consumesCollector());
+  theStubEfficiencyValidation = std::make_unique<CSCStubEfficiencyValidation>(
+      ps.getParameter<edm::InputTag>("stubEfficiencyTag"), ps, consumesCollector());
 
   if (doSim_) {
     theStripDigiValidation->setSimHitMap(&theSimHitMap);
