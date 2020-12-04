@@ -14,6 +14,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load("Validation.MuonCSCDigis.cscDigiValidation_cfi")
 process.load("Validation.MuonCSCDigis.PostProcessor_cff")
+process.load('DQMOffline.Configuration.DQMOfflineMC_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -36,14 +37,26 @@ fileNames = cms.untracked.vstring(
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '')
 
+process.DQMoutput = cms.OutputModule("DQMRootOutputModule",
+    dataset = cms.untracked.PSet(
+        dataTier = cms.untracked.string('DQMIO'),
+        filterName = cms.untracked.string('')
+    ),
+    fileName = cms.untracked.string('file:step3_inDQM.root'),
+    outputCommands = process.DQMEventContent.outputCommands,
+    splitLevel = cms.untracked.int32(0)
+)
+
 # Path and EndPath definitions
 process.validation_step = cms.Path(process.mix * process.cscDigiValidation)
 process.harvesting_step = cms.Path(process.cscDigiHarvesting)
 process.endjob_step = cms.EndPath(process.endOfProcess)
+process.DQMoutput_step = cms.EndPath(process.DQMoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
     process.validation_step,
     process.harvesting_step,
-    process.endjob_step
+    process.endjob_step,
+    process.DQMoutput_step
 )
