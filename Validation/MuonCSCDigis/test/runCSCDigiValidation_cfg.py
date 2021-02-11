@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10),
+    input = cms.untracked.int32(-1),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
@@ -28,6 +28,10 @@ process.source = cms.Source(
     "PoolSource",
     fileNames = cms.untracked.vstring(
         "/store/relval/CMSSW_11_2_0_pre7/RelValSingleMuPt10/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v8-v1/20000/0ED98457-2CEC-924D-AAFC-4F3F705C2DCC.root"
+        #"/store/relval/CMSSW_11_2_0_pre9/RelValSingleMuPt100/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v11-v1/00000/1e211854-2fbf-4ab7-864d-9ee3cba14035.root",
+        #"/store/relval/CMSSW_11_2_0_pre9/RelValSingleMuPt100/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v11-v1/00000/92533d1f-b029-4f45-a602-ca671852a0ba.root"
+        #"/store/relval/CMSSW_11_2_0_pre11/RelValSingleMuPt100/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v13-v1/00000/32b157a1-5eb8-47ad-9c29-053ab0efd3b7.root"
+        #"/store/relval/CMSSW_11_2_0_pre9/RelValSingleMuPt100/GEN-SIM-DIGI-RAW/112X_mcRun3_2021_realistic_v11-v1/00000/92533d1f-b029-4f45-a602-ca671852a0ba.root"
     ),
     secondaryFileNames = cms.untracked.vstring()
 )
