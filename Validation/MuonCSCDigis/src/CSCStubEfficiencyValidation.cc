@@ -24,7 +24,7 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag& in
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
   simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
-  std::cout << "MIN_ETA: " << simTrackMinEta_ << ", MAX_ETA: " << simTrackMaxEta_ << std::endl;
+  //std::cout << "MIN_ETA: " << simTrackMinEta_ << ", MAX_ETA: " << simTrackMaxEta_ << std::endl;
 
   alcts_Token_ = iC.consumes<CSCALCTDigiCollection>(inputTag);
   clcts_Token_ = iC.consumes<CSCCLCTDigiCollection>(inputTag);
@@ -60,51 +60,57 @@ CSCStubEfficiencyValidation::CSCStubEfficiencyValidation(const edm::InputTag& in
   int chamberCounter = 0;
   for (int endcap = 1; endcap <= 2; endcap++) {
     for (int station = 1; station <= 4; station++) {
-      for (int ring = 1; ring <= 3; ring++) {
-        if (ring == 3 && station > 1)
-          continue;  // Only station 1 has 3 rings
+      for (int ring = 1; ring <= 4; ring++) {
+        if (ring >= 3 && station > 1)
+          continue;  // Only station 1 has more than 2 rings (4 is half of ME11)
         std::vector<double> listOfChambers;
-        for (int chamber = 1; chamber <= 36; chamber++) {
+        for (int chamber = 0; chamber < 64; chamber++) {
           CSCDetId ch_id(endcap, station, ring, chamber, 0);
           listOfChambers.push_back(double(ch_id.chamberId()));
+	  //std::cout<<"Endcap|station|ring|chamberCounter|chamber"<<std::to_string(endcap) + std::to_string(station) + std::to_string(ring) + std::to_string(chamberCounter) << double(ch_id.chamberId()) << std::endl;         
+	  //std::cout << "Endcap, station, ring, chamberCounter, chamber_i, chamber: "<< std::fixed << endcap << ", " << station << ", " << ring << ", " << chamberCounter << ", " << chamber << ", " << ch_id.chamberId() << std::endl;
         }
         chambIdsInEndCapStationRings.insert(
             {std::to_string(endcap) + std::to_string(station) + std::to_string(ring), listOfChambers});
         chamberCounterMap.insert(
             {std::to_string(endcap) + std::to_string(station) + std::to_string(ring), chamberCounter});
         chamberCounter++;
+	//std::cout << "Endcap|station|ring|chamberCounter|chamber_i: "<< std::fixed << endcap << "" << station << " " << ring << " " << chamberCounter << " " << ch_id.chamberId() << std::endl;
       }
     }
   }
 
   etaRanges.clear();
   // ME1/1
-  etaRanges.insert({"111", std::tuple(1.6, 2.4)});
-  etaRanges.insert({"211", std::tuple(-2.4, -1.6)});
+  etaRanges.insert({"111", std::tuple(1.5, 2.2)});
+  etaRanges.insert({"211", std::tuple(-2.2, -1.5)});
+  // ME1/1b
+  etaRanges.insert({"114", std::tuple(2.0, 2.5)});
+  etaRanges.insert({"214", std::tuple(-2.5, -2.0)});
   // ME1/2
-  etaRanges.insert({"112", std::tuple(1.2, 1.7)});
-  etaRanges.insert({"212", std::tuple(-1.7, -1.2)});
+  etaRanges.insert({"112", std::tuple(1.1, 1.7)});
+  etaRanges.insert({"212", std::tuple(-1.7, -1.1)});
   // ME1/3
-  etaRanges.insert({"113", std::tuple(0.9, 1.1)});
-  etaRanges.insert({"213", std::tuple(-1.1, -0.9)});
+  etaRanges.insert({"113", std::tuple(0.8, 1.2)});
+  etaRanges.insert({"213", std::tuple(-1.2, -0.8)});
   // ME2/1
-  etaRanges.insert({"121", std::tuple(1.6, 2.4)});
-  etaRanges.insert({"221", std::tuple(-2.4, -1.6)});
+  etaRanges.insert({"121", std::tuple(1.5, 2.5)});
+  etaRanges.insert({"221", std::tuple(-2.5, -1.5)});
   // ME2/2
-  etaRanges.insert({"122", std::tuple(1.0, 1.6)});
-  etaRanges.insert({"222", std::tuple(-1.6, -1.0)});
+  etaRanges.insert({"122", std::tuple(0.9, 1.6)});
+  etaRanges.insert({"222", std::tuple(-1.6, -0.9)});
   // ME3/1
-  etaRanges.insert({"131", std::tuple(1.7, 2.4)});
-  etaRanges.insert({"231", std::tuple(-2.4, -1.7)});
+  etaRanges.insert({"131", std::tuple(1.7, 2.5)});
+  etaRanges.insert({"231", std::tuple(-2.5, -1.7)});
   // ME3/2
-  etaRanges.insert({"132", std::tuple(1.1, 1.7)});
-  etaRanges.insert({"232", std::tuple(-1.7, -1.1)});
+  etaRanges.insert({"132", std::tuple(1.0, 1.7)});
+  etaRanges.insert({"232", std::tuple(-1.7, -1.0)});
   // ME4/1
-  etaRanges.insert({"141", std::tuple(1.8, 2.4)});
-  etaRanges.insert({"241", std::tuple(-2.4, -1.8)});
+  etaRanges.insert({"141", std::tuple(1.7, 2.5)});
+  etaRanges.insert({"241", std::tuple(-2.5, -1.7)});
   // ME4/2
-  etaRanges.insert({"142", std::tuple(1.2, 1.8)});
-  etaRanges.insert({"242", std::tuple(-1.8, -1.2)});
+  etaRanges.insert({"142", std::tuple(1.1, 1.8)});
+  etaRanges.insert({"242", std::tuple(-1.8, -1.1)});
 }
 
 CSCStubEfficiencyValidation::~CSCStubEfficiencyValidation() {}
@@ -119,8 +125,8 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker& iBooker) {
     // Total of 252 plots per station
     for (int station = 1; station <= 4; station++) {
       // Only station 1 has 3 rings
-      for (int ring = 1; ring <= 3; ring++) {
-        if (ring == 3 && station > 1)
+      for (int ring = 1; ring <= 4; ring++) {
+        if (ring >= 3 && station > 1)
           continue;
         // 36 chambers in rings 2 and 3, 18 in ring 1.
         //for (int chamber = 1; chamber <= 36; chamber++) {
@@ -134,16 +140,20 @@ void CSCStubEfficiencyValidation::bookHistograms(DQMStore::IBooker& iBooker) {
                              std::to_string(station) + "Ring" + std::to_string(ring);
         std::string title3 = "CSCStubDigiEfficienciesEndCap" + std::to_string(endcap) + "Station" +
                              std::to_string(station) + "Ring" + std::to_string(ring);
-        numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 6000, -3.0, 3.0);
-        denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 100, -2.4, 2.4);
-        efficiencyPlots[plotCounter] = iBooker.book1D(title3, title3, 100, -2.4, 2.4);
+	std::tuple etaTuple = etaRanges[std::to_string(endcap) + std::to_string(station) + std::to_string(ring)];
+	double tempLow = std::get<0>(etaTuple);
+	double tempHigh = std::get<1>(etaTuple);
+	double tempRange = tempHigh-tempLow;
+        numeratorPlots[plotCounter] = iBooker.book1D(title1, title1, 20*tempRange, tempLow, tempHigh);
+        denominatorPlots[plotCounter] = iBooker.book1D(title2, title2, 20*tempRange, tempLow, tempHigh);
+        efficiencyPlots[plotCounter] = iBooker.book1D(title3, title3, 20*tempRange, tempLow, tempHigh);
         plotCounter++;
         //}
       }
     }
   }
   std::cout << "Total plots: " << plotCounter + 1 << std::endl;
-  testHist = iBooker.book1D("CSCStubDigiTest", "CSCStubDigiTest", 100, -2.4, 2.4);
+  testHist = iBooker.book1D("CSCStubDigiTest", "CSCStubDigiTest", 100, -50, 50);
 }
 
 /*
@@ -188,7 +198,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event& e, const edm::EventS
   */
 
   // Test output
-  std::cout << "Total number of SimTrack in this event: " << sim_track.size() << std::endl;
+  //std::cout << "Total number of SimTrack in this event: " << sim_track.size() << std::endl;
 
   edm::SimTrackContainer sim_track_selected;
   for (const auto& t : sim_track) {
@@ -196,7 +206,7 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event& e, const edm::EventS
       continue;
     sim_track_selected.push_back(t);
   }
-  std::cout << "Good simTracks: " << sim_track_selected.size() << std::endl;
+  //std::cout << "Good simTracks: " << sim_track_selected.size() << std::endl;
   if (sim_track_selected.size() == 0) {
     std::cout << "No matched simtracks, skip event" << std::endl;
     return;
@@ -208,14 +218,15 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event& e, const edm::EventS
     cscStubMatcher_->match(t, sim_vert[t.vertIndex()]);
     if (std::abs(t.momentum().eta()) < 0.9 || std::abs(t.momentum().eta()) > 3.0)
       continue;
-    std::cout << "Matched track eta: " << t.momentum().eta() << std::endl;
+    //std::cout << "Matched track eta: " << t.momentum().eta() << std::endl;
 
     // denom: muons (sim_tracks) within a certain eta range that have >3(4) simhits in a chamber;
     for (int endcap = 1; endcap <= 2; endcap++) {
       for (int station = 1; station <= 4; station++) {
-        for (int ring = 1; ring <= 3; ring++) {
-          if (ring == 3 && station > 1)
+        for (int ring = 1; ring <= 4; ring++) {
+          if (ring >= 3 && station > 1)
             continue;
+	  //std::cout<<"Get EtaTuple"<<std::endl;
           std::tuple etaTuple = etaRanges[std::to_string(endcap) + std::to_string(station) + std::to_string(ring)];
           if (std::get<0>(etaTuple) < t.momentum().eta() && t.momentum().eta() < std::get<1>(etaTuple)) {
             //std::string outputString = "In endcap " + std::to_string(endcap) + ", station " + std::to_string(station) +
@@ -225,14 +236,15 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event& e, const edm::EventS
             //for (int i = 0; double(i) < double(theseChambers.size()); i++) {
             //  outputString = outputString + " " + std::to_string(theseChambers[i]);
             //}
-            //std::cout << outputString << std::endl;
+            //std::cout << "Fill" << std::to_string(endcap) + std::to_string(station) + std::to_string(ring) << std::endl;
             denominatorPlots[chamberCounterMap[std::to_string(endcap) + std::to_string(station) + std::to_string(ring)]]
                 ->Fill(t.momentum().eta());
           }
+	  //std::cout<<"Next"<<std::endl;
         }
       }
     }
-
+    //std::cout<<"Get matchers"<<std::endl;
     // Store matched stubs.
     // Key: ChamberID, Value : CSCStubDigiContainer
     std::map<unsigned int, CSCALCTDigiContainer> alcts = cscStubMatcher_->alcts();
@@ -250,12 +262,12 @@ void CSCStubEfficiencyValidation::analyze(const edm::Event& e, const edm::EventS
     //for (auto& [myKey, myValue] : alcts) {
       //std::cout << myKey << " is in alcts, with this many elements " << myValue.size() << std::endl;
       //}
-
+    //std::cout<<"Next for"<<std::endl;
     for (int endcap = 1; endcap <= 2; endcap++) {
       for (int station = 1; station <= 4; station++) {
-        for (int ring = 1; ring <= 3; ring++) {
+        for (int ring = 1; ring <= 4; ring++) {
 	  // Only station 1 has 3 rings
-          if (ring == 3 && station > 1)
+          if (ring >= 3 && station > 1)
             continue;
           std::vector<double> listOfChambers =
               chambIdsInEndCapStationRings[std::to_string(endcap) + std::to_string(station) + std::to_string(ring)];

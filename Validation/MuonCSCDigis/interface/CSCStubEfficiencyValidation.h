@@ -42,9 +42,9 @@ private:
 
   std::shared_ptr<CSCStubMatcher> cscStubMatcher_;
 
-  MonitorElement *numeratorPlots[18];
-  MonitorElement *denominatorPlots[18];
-  MonitorElement *efficiencyPlots[18];
+  MonitorElement *numeratorPlots[22];
+  MonitorElement *denominatorPlots[22];
+  MonitorElement *efficiencyPlots[22];
   MonitorElement *testHist;
 
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
